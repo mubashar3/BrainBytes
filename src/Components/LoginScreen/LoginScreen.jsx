@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import images from "../../asstes/images";
 import { useStateValue } from "../../state/StateProvider";
 import { actionTypes } from "../../state/Reducer/Reducer";
@@ -9,6 +9,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const LoginScreen = () => {
+  const [{ user }] = useStateValue();
   const navigate = useNavigate();
   const [visiblePassword, setVisiblePassword] = useState(false);
   const [, dispatch] = useStateValue();
@@ -24,6 +25,12 @@ const LoginScreen = () => {
     autoClose: 3000,
     theme: "dark",
   };
+
+  useEffect(() => {
+    if (user) {
+      return navigate("/");
+    }
+  }, [user]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

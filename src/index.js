@@ -19,11 +19,8 @@ import ProjectScreen from "./Components/ProjectScreen/ProjectScreen.jsx";
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<App />}>
-      <Route path="/" element={<Dashboard />} />
-      <Route
-        path="/projects/:projectName/:projectKey"
-        element={<ProjectScreen />}
-      />
+      <Route index element={<Dashboard />} />
+      <Route path="/projects/:projectKey" element={<ProjectScreen />} />
       <Route path="/login" element={<LoginScreen />} />
       <Route path="/*" element={<Navigate to={"/"} replace />} />
     </Route>
@@ -34,7 +31,9 @@ const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <StateProvider initialState={initialState} reducer={reducer}>
-      <RouterProvider router={router} />
+      <RouterProvider router={router}>
+        <App />
+      </RouterProvider>
     </StateProvider>
   </React.StrictMode>
 );

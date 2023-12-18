@@ -1,10 +1,16 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import images from "../../asstes/images";
 import IssueList from "./IssueList";
 import axios from "axios";
 import { ADD_ISSUE } from "../../routes/route";
 
-const CreateIssueBox = ({ handleAddIssue, projectkey, project, title }) => {
+const CreateIssueBox = ({
+  handleAddIssue,
+  projectkey,
+  project,
+  title,
+  searchIssue,
+}) => {
   const [isMoreLineVisible, setIsMoreLineVisible] = useState(false);
   const [issueText, setIssueText] = useState("");
   const [isCreatingIssue, setIsCreatingIssue] = useState(false);
@@ -63,7 +69,13 @@ const CreateIssueBox = ({ handleAddIssue, projectkey, project, title }) => {
           </div>
         ) : (
           project.issue
-            .filter((issue) => issue.status === title)
+            .filter(
+              (issue) =>
+                issue.status === title &&
+                issue.issueText
+                  .toLowerCase()
+                  .includes(searchIssue.toLowerCase())
+            )
             .map((issue, index) => (
               <IssueList
                 key={index}

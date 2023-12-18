@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Email from "./Email";
 import ProjectName from "./ProjectName";
 import MoreLine from "./MoreLine";
-import { Link, redirect, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../Navbar/Navbar";
 import AddProjectModal from "./AddProjectModal";
 import { v4 as uuid4 } from "uuid";
@@ -29,7 +29,12 @@ const Dashboard = () => {
   };
 
   const getProjects = async () => {
-    if (projects === undefined || projectsLoader || user === undefined) {
+    if (
+      projects === undefined ||
+      projectsLoader ||
+      user === undefined ||
+      user?.id === undefined
+    ) {
       return;
     }
     try {
@@ -119,12 +124,14 @@ const Dashboard = () => {
       <div className="w-[95%] m-auto flex flex-col gap-5">
         <div className="flex items-center justify-between">
           <p className="font-bold text-2xl">Projects</p>
-          <button
-            className="btn btn-accent"
-            onClick={() => setAddProjectModal(true)}
-          >
-            Create Project
-          </button>
+          {user?.status === "admin" ? (
+            <button
+              className="btn btn-accent"
+              onClick={() => setAddProjectModal(true)}
+            >
+              Create Project
+            </button>
+          ) : null}
           {addProjectModal && (
             <AddProjectModal
               projectKey={projectKey}
@@ -169,7 +176,7 @@ const Dashboard = () => {
                   <tr key={index}>
                     <td>
                       <Link
-                        to={`/projects/${item?.name}/${item?.key}`}
+                        to={`/projects/${item?.key}`}
                         className="hover:underline"
                       >
                         <ProjectName projectName={item?.name} />
@@ -183,11 +190,15 @@ const Dashboard = () => {
                         email={item?.lead || user.email}
                       />
                     </td>
-                    <td>
-                      <MoreLine
-                        deleteProject={() => deleteProject(item?.key)}
-                      />
-                    </td>
+                    {user?.status === "admin" ? (
+                      <>
+                        <td>
+                          <MoreLine
+                            deleteProject={() => deleteProject(item?.key)}
+                          />
+                        </td>
+                      </>
+                    ) : null}
                   </tr>
                 );
               })

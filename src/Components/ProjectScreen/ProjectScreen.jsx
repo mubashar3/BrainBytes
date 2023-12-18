@@ -5,35 +5,41 @@ import images from "../../asstes/images";
 import CreateIssueBox from "./CreateIssueBox";
 import axios from "axios";
 import { GET_PROJECT, UPDATE_PROJECT_NAME } from "../../routes/route";
+import { useStateValue } from "../../state/StateProvider";
 
 const ProjectScreen = () => {
-  const { projectName } = useParams();
-  const [editedProjectName, setEditedProjectName] = useState(projectName);
+  const [{ projects }] = useStateValue();
+  const [editedProjectName, setEditedProjectName] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [issues, setIssues] = useState([]);
   const [project, setProject] = useState({});
-  const projectData = useParams();
-  const key = projectData.projectKey;
+  const [searchIssue, setSearchIssue] = useState("");
+  const projectKey = useParams()?.projectKey;
 
   const handleAddIssue = (issueText) => {
     setIssues([...issues, issueText]);
   };
 
+  const getProject = async () => {
+    try {
+      const response = await axios.get(`${GET_PROJECT}/${projectKey}`);
+      const project = response.data;
+      setProject(project);
+      setEditedProjectName(project?.name);
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+    }
+  };
+
   useEffect(() => {
-    (async () => {
-      try {
-        const response = await axios.get(`${GET_PROJECT}/${key}`);
-        const project = response.data;
-        setProject(project);
-      } catch (error) {
-        console.error("Error fetching projects:", error);
-      }
-    })();
-  }, [key]);
+    if (Object.keys(project).length === 0) {
+      getProject();
+    }
+  }, [projectKey, projects, project]);
 
   const handleEditName = async () => {
     try {
-      if (editedProjectName === projectName) {
+      if (editedProjectName === project?.name) {
         setIsEditing(false);
         return;
       }
@@ -43,7 +49,7 @@ const ProjectScreen = () => {
         return;
       }
 
-      const response = await axios.put(`${UPDATE_PROJECT_NAME}/${key}`, {
+      const response = await axios.put(`${UPDATE_PROJECT_NAME}/${projectKey}`, {
         projectName: editedProjectName,
       });
 
@@ -65,7 +71,7 @@ const ProjectScreen = () => {
             <Link to={"/"} className="hover:underline">
               Projects
             </Link>
-            /<span>{projectName}</span>
+            /<span>{project?.name}</span>
           </p>
           <div onBlur={handleEditName}>
             <input
@@ -80,7 +86,10 @@ const ProjectScreen = () => {
         <div className="w-full flex gap-3 items-center">
           <div className="flex w-[150px] border-[1px] border-gray-600 justify-between items-center rounded-md">
             <input
+              value={searchIssue}
+              onChange={(e) => setSearchIssue(e.target.value)}
               type="text"
+              placeholder="search issue"
               className="p-2 w-[80%] bg-transparent focus:outline-none"
             />
             <button>
@@ -97,23 +106,26 @@ const ProjectScreen = () => {
         <div className="flex gap-8">
           <CreateIssueBox
             title={"TODO"}
+            searchIssue={searchIssue}
             handleAddIssue={handleAddIssue}
             issues={issues}
-            projectkey={key}
+            projectkey={projectKey}
             project={project}
           />
           <CreateIssueBox
             title={"IN PROGRESS"}
+            searchIssue={searchIssue}
             handleAddIssue={handleAddIssue}
             issues={issues}
-            projectkey={key}
+            projectkey={projectKey}
             project={project}
           />
           <CreateIssueBox
             title={"DONE ✔"}
+            searchIssue={searchIssue}
             handleAddIssue={handleAddIssue}
             issues={issues}
-            projectkey={key}
+            projectkey={projectKey}
             project={project}
           />
         </div>
