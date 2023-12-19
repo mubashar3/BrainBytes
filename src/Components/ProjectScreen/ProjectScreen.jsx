@@ -6,9 +6,12 @@ import CreateIssueBox from "./CreateIssueBox";
 import axios from "axios";
 import { GET_PROJECT, UPDATE_PROJECT_NAME } from "../../routes/route";
 import { useStateValue } from "../../state/StateProvider";
+import { actionTypes } from "../../state/Reducer/Reducer";
+import Loader from "../Loader/Loader";
 
 const ProjectScreen = () => {
-  const [{ projects }] = useStateValue();
+  const [updateNameLoader, setUpdateNameLoader] = useState(false);
+  const [{ projects }, dispatch] = useStateValue();
   const [editedProjectName, setEditedProjectName] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [issues, setIssues] = useState([]);
@@ -32,6 +35,10 @@ const ProjectScreen = () => {
   };
 
   useEffect(() => {
+    console.log(project);
+  }, [issues]);
+
+  useEffect(() => {
     if (Object.keys(project).length === 0) {
       getProject();
     }
@@ -39,12 +46,19 @@ const ProjectScreen = () => {
 
   const handleEditName = async () => {
     try {
+      setUpdateNameLoader(true);
+      let older = [...projects];
+      console.log(older);
+      const index = older.findIndex((project) => project.key === projectKey);
+      let update = {};
       if (editedProjectName === project?.name) {
         setIsEditing(false);
+        setUpdateNameLoader(false);
         return;
       }
 
       if (editedProjectName.trim() === "") {
+        setUpdateNameLoader(false);
         setIsEditing(false);
         return;
       }
@@ -52,10 +66,25 @@ const ProjectScreen = () => {
       const response = await axios.put(`${UPDATE_PROJECT_NAME}/${projectKey}`, {
         projectName: editedProjectName,
       });
-
       if (response.status === 200) {
-        console.log("Project Updated Successfully");
+        setUpdateNameLoader(false);
         setIsEditing(false);
+      }
+
+      update = {
+        ...project,
+        name: editedProjectName,
+      };
+
+      setProject(update);
+
+      if (index !== -1) {
+        const oldUser = older[index];
+        older[index] = {
+          ...oldUser,
+          name: editedProjectName,
+        };
+        dispatch({ type: actionTypes.SET_PROJECTS, projects: older });
       }
     } catch (e) {
       console.error("Error updating project name:", e.message);
@@ -71,7 +100,7 @@ const ProjectScreen = () => {
             <Link to={"/"} className="hover:underline">
               Projects
             </Link>
-            /<span>{project?.name}</span>
+            /<span>{updateNameLoader ? <Loader /> : project?.name}</span>
           </p>
           <div onBlur={handleEditName}>
             <input
@@ -108,24 +137,27 @@ const ProjectScreen = () => {
             title={"TODO"}
             searchIssue={searchIssue}
             handleAddIssue={handleAddIssue}
-            issues={issues}
+            // issues={issues}
             projectkey={projectKey}
             project={project}
+            setProject={setProject}
           />
           <CreateIssueBox
             title={"IN PROGRESS"}
             searchIssue={searchIssue}
             handleAddIssue={handleAddIssue}
-            issues={issues}
+            // issues={issues}
             projectkey={projectKey}
+            setProject={setProject}
             project={project}
           />
           <CreateIssueBox
             title={"DONE ✔"}
             searchIssue={searchIssue}
             handleAddIssue={handleAddIssue}
-            issues={issues}
+            // issues={issues}
             projectkey={projectKey}
+            setProject={setProject}
             project={project}
           />
         </div>

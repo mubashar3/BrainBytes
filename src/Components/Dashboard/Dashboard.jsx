@@ -9,12 +9,11 @@ import { v4 as uuid4 } from "uuid";
 import axios from "axios";
 import { useStateValue } from "../../state/StateProvider";
 import { actionTypes } from "../../state/Reducer/Reducer";
-import { ADD_PROJECT, DELETE_PROJECT, GET_PROJECTS } from "../../routes/route";
+import { ADD_PROJECT, DELETE_PROJECT } from "../../routes/route";
 import { toast } from "react-toastify";
 
 const Dashboard = () => {
   const [{ user, projects }, dispatch] = useStateValue();
-  const [projectsLoader, setProjectsLoader] = useState(false);
   const [projectKey, setProjectKey] = useState("");
   const [isActive, setIsActive] = useState(false);
   const [projectName, setProjectName] = useState("");
@@ -27,42 +26,6 @@ const Dashboard = () => {
     autoClose: 3000,
     theme: "dark",
   };
-
-  const getProjects = async () => {
-    if (
-      projects === undefined ||
-      projectsLoader ||
-      user === undefined ||
-      user?.id === undefined
-    ) {
-      return;
-    }
-    try {
-      setProjectsLoader(true);
-      const response = await axios.get(`${GET_PROJECTS}/${user?.id}`);
-      const projects = response.data;
-      if (response.status === 200) {
-        dispatch({
-          type: actionTypes.SET_PROJECTS,
-          projects: projects,
-        });
-      }
-    } catch (error) {
-      if (error.response.status === 400) {
-        console.log("invalid user");
-        return;
-      }
-      console.error("server error:", error);
-    } finally {
-      setProjectsLoader(false);
-    }
-  };
-
-  useEffect(() => {
-    if (!projectsLoader) {
-      getProjects();
-    }
-  }, [user]);
 
   const handleProjectSubmit = async (e) => {
     e.preventDefault();
@@ -158,7 +121,7 @@ const Dashboard = () => {
             </tr>
           </thead>
           <tbody>
-            {projects === null || projectsLoader ? (
+            {projects === null ? (
               <tr>
                 <td className="text-center" colSpan={5}>
                   <span className="loading loading-spinner loading-lg"></span>

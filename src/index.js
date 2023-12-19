@@ -4,7 +4,7 @@ import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { StateProvider } from "./state/StateProvider";
-import reducer, { initialState } from "./state/Reducer/Reducer";
+import reducer, { initialState } from "./state/Reducer/Reducer.js";
 import {
   Navigate,
   Route,
@@ -31,9 +31,7 @@ const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <StateProvider initialState={initialState} reducer={reducer}>
-      <RouterProvider router={router}>
-        <App />
-      </RouterProvider>
+      <RouterProvider router={router} />
     </StateProvider>
   </React.StrictMode>
 );

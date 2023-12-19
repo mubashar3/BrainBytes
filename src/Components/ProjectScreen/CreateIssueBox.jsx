@@ -3,6 +3,7 @@ import images from "../../asstes/images";
 import IssueList from "./IssueList";
 import axios from "axios";
 import { ADD_ISSUE } from "../../routes/route";
+import { v4 as uuid4 } from "uuid";
 
 const CreateIssueBox = ({
   handleAddIssue,
@@ -10,10 +11,16 @@ const CreateIssueBox = ({
   project,
   title,
   searchIssue,
+  setProject,
 }) => {
   const [isMoreLineVisible, setIsMoreLineVisible] = useState(false);
   const [issueText, setIssueText] = useState("");
   const [isCreatingIssue, setIsCreatingIssue] = useState(false);
+  const [key, setKey] = useState("");
+
+  useEffect(() => {
+    setKey(uuid4());
+  }, [isCreatingIssue]);
 
   const resetBox = () => {
     setIsCreatingIssue(false);
@@ -37,6 +44,10 @@ const CreateIssueBox = ({
       handleAddIssue(issueText);
       setIssueText("");
       resetBox();
+      setProject((prev) => ({
+        ...prev,
+        issue: [...(prev.issue || []), issueData], // Add the new issue to the existing issues array
+      }));
     } catch (e) {
       console.error("Error adding issue:", e.message);
     }
@@ -78,6 +89,7 @@ const CreateIssueBox = ({
             )
             .map((issue, index) => (
               <IssueList
+                setProject={setProject}
                 key={index}
                 issue={issue}
                 index={index}
@@ -113,6 +125,7 @@ const CreateIssueBox = ({
         </form>
       ) : (
         <button
+          hidden={title === "DONE ✔"}
           onClick={() => setIsCreatingIssue(true)}
           className="px-2 hover:bg-[#252a2e] py-2 rounded-md cursor-pointer"
         >
