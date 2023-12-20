@@ -1,12 +1,30 @@
 import React, { useEffect, useRef, useState } from "react";
 import images from "../../asstes/images";
 import { useStateValue } from "../../state/StateProvider";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { actionTypes } from "../../state/Reducer/Reducer";
+import Confirm from "../Confirm_Modal/Confirm";
 
-const Navbar = ({ handleLogout }) => {
-  const [{ user }] = useStateValue();
+const Navbar = () => {
+  const [{ user }, dispatch] = useStateValue();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
   const dropdownRef = useRef(null);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    dispatch({ type: actionTypes.SET_USER, user: null });
+    navigate("/login");
+  };
+
+  const handleOpenModal = () => {
+    setOpenModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+  };
 
   const toggleDropdown = (event) => {
     event.stopPropagation();
@@ -34,7 +52,7 @@ const Navbar = ({ handleLogout }) => {
   return (
     <div>
       <nav className="flex justify-between items-center h-16 border-b-[1px] border-gray-600 px-10">
-        <h1 className="font-bold text-xl">BrainBytes</h1>
+        <h1 className="font-bold text-xl">AVISA DEV</h1>
         <button className="w-8 relative" onClick={toggleDropdown}>
           <img src={images.profile} alt="profile" />
         </button>
@@ -57,19 +75,30 @@ const Navbar = ({ handleLogout }) => {
             </div>
             <div className="w-full p-[1px] bg-[#3c4750]"></div>
             <div>
-              <Link to={"/profile"}>
+              <Link to={"/"} onClick={closeDropdown}>
+                <div className="text-left p-2 cursor-pointer rounded-md hover:bg-[#3c475067]">
+                  Dashboard
+                </div>
+              </Link>
+              <Link to={"/profile"} onClick={closeDropdown}>
                 <div className="text-left p-2 cursor-pointer rounded-md hover:bg-[#3c475067]">
                   Profile
                 </div>
               </Link>
-              <div
-                onClick={handleLogout}
-                className="text-left p-2 cursor-pointer rounded-md hover:bg-[#3c475067]"
+              <button
+                onClick={handleOpenModal}
+                className="text-left w-full p-2 cursor-pointer rounded-md hover:bg-[#3c475067]"
               >
                 Logout
-              </div>
+              </button>
             </div>
           </div>
+          {openModal && (
+            <Confirm
+              handleClose={handleCloseModal}
+              handleLogout={handleLogout}
+            />
+          )}
         </div>
       )}
     </div>

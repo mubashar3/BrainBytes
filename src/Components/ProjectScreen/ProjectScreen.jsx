@@ -11,7 +11,7 @@ import Loader from "../Loader/Loader";
 
 const ProjectScreen = () => {
   const [updateNameLoader, setUpdateNameLoader] = useState(false);
-  const [{ projects }, dispatch] = useStateValue();
+  const [{ user, projects }, dispatch] = useStateValue();
   const [editedProjectName, setEditedProjectName] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [issues, setIssues] = useState([]);
@@ -33,10 +33,6 @@ const ProjectScreen = () => {
       console.error("Error fetching projects:", error);
     }
   };
-
-  useEffect(() => {
-    console.log(project);
-  }, [issues]);
 
   useEffect(() => {
     if (Object.keys(project).length === 0) {
@@ -102,15 +98,19 @@ const ProjectScreen = () => {
             </Link>
             /<span>{updateNameLoader ? <Loader /> : project?.name}</span>
           </p>
-          <div onBlur={handleEditName}>
-            <input
-              className="bg-transparent p-1 border-2 border-transparent focus:rounded-md focus:border-2 focus:border-[#85b8ff] focus:outline-none"
-              type="text"
-              disabled={isEditing}
-              value={editedProjectName}
-              onChange={(e) => setEditedProjectName(e.target.value)}
-            />
-          </div>
+          {user.status === "admin" ? (
+            <div onBlur={handleEditName}>
+              <input
+                className="bg-transparent p-1 border-2 border-transparent focus:rounded-md focus:border-2 focus:border-[#85b8ff] focus:outline-none"
+                type="text"
+                disabled={isEditing}
+                value={editedProjectName}
+                onChange={(e) => setEditedProjectName(e.target.value)}
+              />
+            </div>
+          ) : (
+            <div>{project?.name}</div>
+          )}
         </div>
         <div className="w-full flex gap-3 items-center">
           <div className="flex w-[150px] border-[1px] border-gray-600 justify-between items-center rounded-md">

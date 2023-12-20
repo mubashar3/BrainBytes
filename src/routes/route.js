@@ -1,6 +1,7 @@
 const url = "http://localhost:3001";
 
 export const SIGN_IN = `${url}/api/signin`;
+export const UPDATE_USER = `${url}/api/update`;
 
 export const ADD_PROJECT = `${url}/api/addproject`;
 export const GET_PROJECTS = `${url}/api/getprojects`;

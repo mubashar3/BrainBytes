@@ -1,4 +1,4 @@
-import { Outlet, useNavigate } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import "./App.css";
 import { useStateValue } from "./state/StateProvider";
 import { useEffect } from "react";
@@ -6,10 +6,19 @@ import { GET_PROJECTS } from "./routes/route";
 import { actionTypes } from "./state/Reducer/Reducer";
 import axios from "axios";
 import { useState } from "react";
+import LoginScreen from "./Components/LoginScreen/LoginScreen";
+import Dashboard from "./Components/Dashboard/Dashboard";
+import ProjectScreen from "./Components/ProjectScreen/ProjectScreen";
+import Profile from "./Components/Profile/Profile";
 
 function App() {
   const [{ user, projects }, dispatch] = useStateValue();
   const [projectsLoader, setProjectsLoader] = useState(false);
+
+  const Authentication = ({ children }) => {
+    return user ? children : <Navigate to={"/login"} />;
+  };
+
   // const navigate = useNavigate();
 
   // useEffect(() => {
@@ -49,7 +58,6 @@ function App() {
   };
 
   useEffect(() => {
-    console.log("object");
     if (!projectsLoader && projects === null) {
       getProjects();
     }
@@ -57,18 +65,36 @@ function App() {
 
   return (
     <div className="App">
-      {/* <BrowserRouter>
+      <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginScreen />} />
           <Route
             path="/"
-            element={user ? <Dashboard /> : <Navigate to="/login" />}
+            element={
+              <Authentication>
+                <Dashboard />
+              </Authentication>
+            }
           />
-          <Route path="/projects/:projectKey" element={<ProjectScreen />} />
-          <Route path="/profile" element={<Profile />} />
+          <Route
+            path="/projects/:projectKey"
+            element={
+              <Authentication>
+                <ProjectScreen />
+              </Authentication>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <Authentication>
+                <Profile />
+              </Authentication>
+            }
+          />
         </Routes>
-      </BrowserRouter> */}
-      <Outlet />
+      </BrowserRouter>
+      {/* <Outlet /> */}
     </div>
   );
 }

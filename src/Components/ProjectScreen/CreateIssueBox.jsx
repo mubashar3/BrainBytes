@@ -4,6 +4,7 @@ import IssueList from "./IssueList";
 import axios from "axios";
 import { ADD_ISSUE } from "../../routes/route";
 import { v4 as uuid4 } from "uuid";
+import { useStateValue } from "../../state/StateProvider";
 
 const CreateIssueBox = ({
   handleAddIssue,
@@ -17,6 +18,7 @@ const CreateIssueBox = ({
   const [issueText, setIssueText] = useState("");
   const [isCreatingIssue, setIsCreatingIssue] = useState(false);
   const [key, setKey] = useState("");
+  const [{ user }] = useStateValue();
 
   useEffect(() => {
     setKey(uuid4());
@@ -28,25 +30,26 @@ const CreateIssueBox = ({
   };
 
   const submitIssue = async (event) => {
-    event.preventDefault();
-
-    if (issueText.trim() === "") {
-      resetBox();
-      return;
-    }
-
     try {
-      const issueData = {
+      event.preventDefault();
+      let data = {};
+      if (issueText.trim() === "") {
+        resetBox();
+        return;
+      }
+
+      data = {
         issueText: issueText,
         status: title,
+        key: key,
       };
-      axios.post(`${ADD_ISSUE}/${projectkey}`, issueData);
+      axios.post(`${ADD_ISSUE}/${projectkey}`, data);
       handleAddIssue(issueText);
       setIssueText("");
       resetBox();
       setProject((prev) => ({
         ...prev,
-        issue: [...(prev.issue || []), issueData], // Add the new issue to the existing issues array
+        issue: [...(prev.issue || []), data],
       }));
     } catch (e) {
       console.error("Error adding issue:", e.message);
@@ -56,7 +59,7 @@ const CreateIssueBox = ({
   return (
     <div
       onBlur={resetBox}
-      className="flex flex-col w-[300px] rounded-lg px-2 py-3 gap-3 bg-[#161a1d] min-h-[144px]"
+      className="flex flex-col w-[300px] rounded-lg px-2 py-3 gap-3 bg-[#161a1d] min-h-[144px] mb-8"
     >
       <div
         className="flex justify-between text-xs cursor-pointer h-9"
@@ -66,11 +69,19 @@ const CreateIssueBox = ({
         <button className="hover:bg-[#252a2e] flex-1 text-left mr-2 px-2 py-1 rounded-md h-6">
           {title}
         </button>
-        {isMoreLineVisible && (
+        {isMoreLineVisible && user?.status !== "employee" && (
           <button className="w-6 p-1 hover:bg-[#252a2e] rounded-md h-6">
             <img src={images.moreLine} alt="more" />
           </button>
         )}
+
+        {/* <div className="dropdown dropdown-bottom">
+  <div tabIndex={0} role="button" className="btn m-1">Click</div>
+  <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+    <li><a>Item 1</a></li>
+    <li><a>Item 2</a></li>
+  </ul>
+</div> */}
       </div>
       {/* Display the list of issues */}
       <div className="flex flex-col gap-1">
@@ -91,7 +102,9 @@ const CreateIssueBox = ({
               <IssueList
                 setProject={setProject}
                 key={index}
+                project={project}
                 issue={issue}
+                id={issue.key}
                 index={index}
                 title={title}
                 projectkey={projectkey}
@@ -125,7 +138,7 @@ const CreateIssueBox = ({
         </form>
       ) : (
         <button
-          hidden={title === "DONE ✔"}
+          hidden={title === "DONE ✔" || user?.status === "employee"}
           onClick={() => setIsCreatingIssue(true)}
           className="px-2 hover:bg-[#252a2e] py-2 rounded-md cursor-pointer"
         >

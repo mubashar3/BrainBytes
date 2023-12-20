@@ -18,7 +18,6 @@ const Dashboard = () => {
   const [isActive, setIsActive] = useState(false);
   const [projectName, setProjectName] = useState("");
   const [addProjectModal, setAddProjectModal] = useState(false);
-  const navigate = useNavigate();
 
   const toastDesign = {
     position: "bottom-left",
@@ -68,13 +67,8 @@ const Dashboard = () => {
         projects: filteredProjects,
       });
     } catch (error) {
-      console.error("Error fetching projects:", error);
+      console.error("Error Deleteing project:", error);
     }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    navigate("/login");
   };
 
   useEffect(() => {
@@ -83,7 +77,7 @@ const Dashboard = () => {
 
   return (
     <div className="flex flex-col gap-8">
-      <Navbar handleLogout={handleLogout} />
+      <Navbar />
       <div className="w-[95%] m-auto flex flex-col gap-5">
         <div className="flex items-center justify-between">
           <p className="font-bold text-2xl">Projects</p>

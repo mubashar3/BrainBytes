@@ -3,24 +3,26 @@ import images from "../../asstes/images";
 import axios from "axios";
 import { DELETE_ISSUE, UPDATE_STATUS } from "../../routes/route";
 
-const DropDown = ({ title, issue, projectkey }) => {
+const DropDown = ({ issue, projectkey, setProject, project }) => {
   const [showDropDown, setShowDropDown] = useState(false);
   const dropdownRef = useRef(null);
 
   const updateStatus = async () => {
-    let newStatus;
-    if (issue.status === "TODO") {
-      newStatus = "IN PROGRESS";
-    } else if (issue.status === "IN PROGRESS") {
-      newStatus = "DONE ✔";
-    }
     try {
+      let newStatus;
+      if (issue.status === "TODO") {
+        newStatus = "IN PROGRESS";
+      } else if (issue.status === "IN PROGRESS") {
+        newStatus = "DONE ✔";
+      }
       const response = axios.put(
         `${UPDATE_STATUS}/${projectkey}/${issue._id}`,
-        { status: newStatus }
+        {
+          status: newStatus,
+        }
       );
       if ((await response).status === 200) {
-        console.log("Issue Added Successfully");
+        console.log("Issue Moved Successfully");
         setShowDropDown(false);
       }
     } catch (e) {
@@ -30,13 +32,20 @@ const DropDown = ({ title, issue, projectkey }) => {
 
   const deleteIssue = async () => {
     try {
+      const updateIssues = project.issue.filter(
+        (projIssue) => projIssue.key !== issue.key
+      );
+      console.log(updateIssues);
       const response = axios.delete(
-        `${DELETE_ISSUE}/${projectkey}/${issue._id}`
+        `${DELETE_ISSUE}/${projectkey}/${issue.key}`
       );
       if ((await response).status === 200) {
-        console.log("Issue Deleted Successfully");
         setShowDropDown(false);
       }
+      setProject((prev) => ({
+        ...prev,
+        issue: updateIssues,
+      }));
     } catch (e) {
       console.log("Error: ", e);
     }
